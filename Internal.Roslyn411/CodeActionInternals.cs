@@ -3,23 +3,23 @@ using System.Composition;
 using Microsoft.CodeAnalysis.CodeActions;
 using MirrorSharp.Internal.Roslyn.Internals;
 
-namespace MirrorSharp.Internal.Roslyn47 {
-    [Shared]
-    [Export(typeof(ICodeActionInternals))]
-    internal class CodeActionInternals : ICodeActionInternals {
-        public bool IsInlinable(CodeAction action) {
-            Argument.NotNull(nameof(action), action);
-            return action.IsInlinable;
-        }
+namespace MirrorSharp.Internal.Roslyn411;
 
-        public Roslyn.Internals.CodeActionPriority GetPriority(CodeAction action) {
-            Argument.NotNull(nameof(action), action);
-            return (Roslyn.Internals.CodeActionPriority)(int)action.Priority;
-        }
+[Shared]
+[Export(typeof(ICodeActionInternals))]
+internal class CodeActionInternals : ICodeActionInternals {
+    public bool IsInlinable(CodeAction action) {
+        Argument.NotNull(nameof(action), action);
+        return action.IsInlinable;
+    }
 
-        public ImmutableArray<CodeAction> GetNestedCodeActions(CodeAction action) {
-            Argument.NotNull(nameof(action), action);
-            return action.NestedCodeActions;
-        }
+    public Roslyn.Internals.CodeActionPriority GetPriority(CodeAction action) {
+        Argument.NotNull(nameof(action), action);
+        return (Roslyn.Internals.CodeActionPriority)(int)action.Priority;
+    }
+
+    public ImmutableArray<CodeAction> GetNestedCodeActions(CodeAction action) {
+        Argument.NotNull(nameof(action), action);
+        return action.NestedCodeActions;
     }
 }

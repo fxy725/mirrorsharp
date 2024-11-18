@@ -7,25 +7,25 @@ using Microsoft.CodeAnalysis.Shared.Utilities;
 using Microsoft.CodeAnalysis.SignatureHelp;
 using MirrorSharp.Internal.Roslyn.Internals;
 
-namespace MirrorSharp.Internal.Roslyn47 {
-    [Export(typeof(ISignatureHelpProviderWrapperResolver))]
-    internal class SignatureHelpProviderWrapperResolver : ISignatureHelpProviderWrapperResolver {
-        private readonly IList<Lazy<ISignatureHelpProvider, OrderableLanguageMetadata>> _allProviders;
+namespace MirrorSharp.Internal.Roslyn411;
 
-        [ImportingConstructor]
-        public SignatureHelpProviderWrapperResolver(
-            [ImportMany] IEnumerable<Lazy<ISignatureHelpProvider, OrderableLanguageMetadata>> allProviders
-        ) {
-            _allProviders = ExtensionOrderer.Order(allProviders);
-        }
+[Export(typeof(ISignatureHelpProviderWrapperResolver))]
+internal class SignatureHelpProviderWrapperResolver : ISignatureHelpProviderWrapperResolver {
+    private readonly IList<Lazy<ISignatureHelpProvider, OrderableLanguageMetadata>> _allProviders;
 
-        public IEnumerable<ISignatureHelpProviderWrapper> GetAllSlow(string languageName) {
-            if (languageName == null)
-                throw new ArgumentNullException(nameof(languageName));
+    [ImportingConstructor]
+    public SignatureHelpProviderWrapperResolver(
+        [ImportMany] IEnumerable<Lazy<ISignatureHelpProvider, OrderableLanguageMetadata>> allProviders
+    ) {
+        _allProviders = ExtensionOrderer.Order(allProviders);
+    }
 
-            return _allProviders
-                .Where(l => l.Metadata.Language == languageName)
-                .Select(l => new SignatureHelpProviderWrapper(l.Value));
-        }
+    public IEnumerable<ISignatureHelpProviderWrapper> GetAllSlow(string languageName) {
+        if (languageName == null)
+            throw new ArgumentNullException(nameof(languageName));
+
+        return _allProviders
+            .Where(l => l.Metadata.Language == languageName)
+            .Select(l => new SignatureHelpProviderWrapper(l.Value));
     }
 }
