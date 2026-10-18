@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.Completion;
-using Microsoft.CodeAnalysis.Text;
 using MirrorSharp.Advanced;
 using MirrorSharp.Internal.Results;
 
@@ -45,7 +44,9 @@ namespace MirrorSharp.Internal.Handlers.Shared {
             var change = await session.LanguageSession.GetCompletionChangeAsync(completionList.Span, item, cancellationToken: cancellationToken).ConfigureAwait(false);
             current.List = null;
 
-            var textChange = ReplaceIncompleteText(session, completionList, change.TextChange);
+            var textChange = CompletionTextChange.Normalize(
+                change.TextChange, completionList.Span, session.CursorPosition, item.DisplayText
+            );
             current.ChangeEchoPending = true;
 
             var writer = sender.StartJsonMessage("changes");
@@ -54,17 +55,6 @@ namespace MirrorSharp.Internal.Handlers.Shared {
             writer.WriteChange(textChange);
             writer.WriteEndArray();
             await sender.SendJsonMessageAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        private static TextChange ReplaceIncompleteText(WorkSession session, CompletionList completionList, TextChange textChange) {
-            var completionSpan = completionList.Span;
-            if (session.CursorPosition <= completionSpan.Start)
-                return textChange;
-
-            var span = textChange.Span;
-            var newStart = Math.Min(span.Start, completionSpan.Start);
-            var newLength = Math.Max(span.End, session.CursorPosition) - newStart;
-            return new TextChange(new TextSpan(newStart, newLength), textChange.NewText);
         }
 
         public async Task SendItemInfoAsync(int selectedIndex, WorkSession session, ICommandResultSender sender, CancellationToken cancellationToken) {
